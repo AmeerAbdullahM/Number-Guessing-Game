@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 void Survival_Mode();
@@ -28,7 +29,7 @@ int main(){             //main function
                     printf("\nDo you want to continue the *Survival Mode* Enter (y) or Enter (n) :");
                     loop_2=Check_input_yn();
                     if(loop_2 == 'y' || loop_2 == 'Y') continue;
-                    else if(loop_2 == 'n' || loop_2 == 'N') break;
+                    else if(loop_2 == 'n' || loop_2 == 'N') break; 
                 }while(1);
                 break;
             }case 2:{
@@ -52,7 +53,6 @@ int main(){             //main function
         else if(loop_1 == 'n' || loop_1 == 'N'){ 
             printf("\nPress Enter to Exit Completely....");
             getchar();
-            getchar();
             break;
         }
     }while(1);
@@ -60,30 +60,56 @@ int main(){             //main function
 
 //Input function checks the given input is correct or not
 
-int Check_input_int(){
-    int number;
-    while(1){
-        if((scanf("%d",&number)==1)){   //here i gava like ==1 because if scaf gets int as a input means it returns 1.
-            return number;              //for char scanf return 0.
-        }else{
-            printf("\nEnter VALID input : ");
-            while(getchar()!='\n');     //remove the invalid input
+
+int Check_input_int() {
+    char buffer[100];      
+    char *end;             
+    long val;
+    while (1) {
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            printf("Enter VALID input : ");
+            continue;
         }
+        if (buffer[strlen(buffer) - 1] != '\n') {   //to solve overflow problm
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);  
+            printf("Input too long! Enter VALID input : ");
+            continue;
+        }
+        val = strtol(buffer, &end, 10);  // reads only numd if any other than numb it will not read
+        while (*end == ' ') end++;       // it will skip empty spaces
+        if (end != buffer && *end == '\n' && val > 0) {
+            return (int)val;
+        }
+        if (val < 0) printf("Enter positive integer : ");
+        else printf("Enter VALID input : ");
     }
 }
+
 
 //Input function checks the give input is y or n or other
 
 char Check_input_yn() {
-    char ch;
+    char buffer[10];
     while (1) {
-        if (scanf(" %c", &ch) == 1) {  
-            if (ch == 'y' || ch == 'Y' || ch == 'n' || ch == 'N') return ch;
-            else printf("\nEnter VALID input (y/n): ");
-        } else printf("\nEnter VALID input (y/n): ");
-        while (getchar() != '\n');  
+        if (!fgets(buffer, sizeof(buffer), stdin)) continue;   //solve overflow
+        if (buffer[strlen(buffer) - 1] != '\n') {
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF); 
+            printf("Enter VALID input (y/n): ");
+            continue;
+        }
+        char ch = buffer[0];  
+        int i = 1;
+        while (buffer[i] == ' ' || buffer[i] == '\r') i++; // skips erta unwanted charcters
+        if ((ch == 'y' || ch == 'Y' || ch == 'n' || ch == 'N') &&
+            buffer[i] == '\n') {
+            return ch;
+        }
+        printf("Enter VALID input (y/n): ");
     }
 }
+
 
 //function 1
 
@@ -116,9 +142,12 @@ void Survival_Mode(){                //Survival mode function
         }case 5:{
             printf("Exiting the Survival Mode.......\n");
             break;
-        }
+        }default:
+            printf("\n\t...Invalid Entry...\n");
+            
     }
 }
+
 
 //function 2
 
@@ -155,9 +184,11 @@ void Timer_Mode(){               //Timer mode function
         }case 5:{
             printf("Exiting the Timer Mode.......\n");
             break;
-        }
+        }default:
+            printf("\n\t...Invalid Entry...\n");
     }
 }
+
 
 //function 3
 
@@ -169,8 +200,8 @@ void Check_rand_numb(int rand_numb,int attempt){             //it will check for
         printf("Enter your guess : ");
         user_numb=Check_input_int();
         if(user_numb>rand_numb){
-            printf("\n ....HIGH....\n");
-        }else if(user_numb<rand_numb){printf("\n ....LOW....\n");
+            printf("\n ....HIGHER THAN THE GUESSED NUMBER....\n");
+        }else if(user_numb<rand_numb){printf("\n ....LOW THAN THE GUESSED NUMBER....\n");
         }else {
             printf("\n****Excellent, You Nailed it***\n");
             printf("YOUR SCORE : %d / %d\n",attempt,s_a);
@@ -198,8 +229,8 @@ void Check_rand_numb_timer(int rand_numb,int time_limit){                //it wi
         printf("Enter your guess : ");
         user_numb=Check_input_int();
         if(user_numb>rand_numb){
-            printf("\n ....HIGH....\n");
-        }else if(user_numb<rand_numb){printf("\n ....LOW....\n");
+            printf("\n ....HIGH THAN THE GUESSED NUMBER....\n");
+        }else if(user_numb<rand_numb){printf("\n ....LOW THAN THE GUESSED NUMBER....\n");
         }else {
             printf("\n****Excellent, You Nailed it***\n");
             printf("Time Taken : %.4lf",difftime(time(NULL),start));
